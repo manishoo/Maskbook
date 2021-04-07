@@ -7,14 +7,20 @@ import * as ZerionAPI from '../apis/zerion'
 import * as DebankAPI from '../apis/debank'
 import { CurrencyType } from '../../../web3/types'
 import { ChainId, EthereumTokenType } from '../../../web3/types'
-import { getChainId } from '../../../extension/background-script/EthereumService'
 import { unreachable } from '../../../utils/utils'
-import { createERC1155Token, createERC721Token, createEtherToken } from '../../../web3/helpers'
+import { createERC1155Token, createERC721Token, createEtherToken, getConstant } from '../../../web3/helpers'
 import { formatChecksumAddress } from '../formatter'
+import { CONSTANTS } from '../../../web3/constants'
 
-export async function getAssetsListNFT(address: string, provider: CollectibleProvider, page?: number) {
+export async function getAssetsListNFT(
+    address: string,
+    chainId: ChainId,
+    provider: CollectibleProvider,
+    page?: number,
+    size?: number,
+) {
     if (provider === CollectibleProvider.OPENSEAN) {
-        const { assets } = await OpenSeaAPI.getAssetsList(address, { page })
+        const { assets } = await OpenSeaAPI.getAssetsList(address, { chainId, page, size })
         return assets
             .filter((x) => ['ERC721', 'ERC1155'].includes(x.asset_contract.schema_name))
             .map((x) => {
@@ -55,16 +61,17 @@ export async function getAssetsListNFT(address: string, provider: CollectiblePro
     return []
 }
 
-export async function getAssetsList(address: string, provider: PortfolioProvider): Promise<Asset[]> {
+export async function getAssetsList(address: string, chainId: ChainId, provider: PortfolioProvider): Promise<Asset[]> {
+    if (chainId !== ChainId.Mainnet) return []
     if (!EthereumAddress.isValid(address)) return []
     switch (provider) {
         case PortfolioProvider.ZERION:
             const { meta, payload } = await ZerionAPI.getAssetsList(address)
             if (meta.status !== 'ok') throw new Error('Fail to load assets.')
-            const assetsList = values(payload.assets)
+            // skip NFT assets
+            const assetsList = values(payload.assets).filter((x) => x.asset.is_displayable && x.asset.icon_url)
             return formatAssetsFromZerion(assetsList)
         case PortfolioProvider.DEBANK:
-            if ((await getChainId()) !== ChainId.Mainnet) return []
             const { data = [], error_code } = await DebankAPI.getAssetsList(address)
             if (error_code === 0) return formatAssetsFromDebank(data)
             return []
@@ -115,9 +122,9 @@ function formatAssetsFromZerion(data: ZerionAddressAsset[]) {
                     name: asset.name,
                     symbol: asset.symbol,
                     decimals: asset.decimals,
-                    address: asset.name,
+                    address: asset.name === 'Ether' ? getConstant(CONSTANTS, 'ETH_ADDRESS') : asset.asset_code,
                     chainId: ChainId.Mainnet,
-                    type: EthereumTokenType.ERC20,
+                    type: asset.name === 'Ether' ? EthereumTokenType.Ether : EthereumTokenType.ERC20,
                 },
                 chain: 'eth',
                 balance: quantity,

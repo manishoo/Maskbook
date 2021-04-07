@@ -67,13 +67,12 @@ import { TokenAmountPanel } from '../../../web3/UI/TokenAmountPanel'
 import { QRCode } from '../../../components/shared/qrcode'
 import { formatBalance, formatEthereumAddress } from '../../../plugins/Wallet/formatter'
 import { useTokenTransferCallback } from '../../../web3/hooks/useTokenTransferCallback'
-import { CollectibleContext } from '../DashboardComponents/CollectibleList'
 import { Flags } from '../../../utils/flags'
 import { useWalletHD } from '../../../plugins/Wallet/hooks/useWallet'
 import { HD_PATH_WITHOUT_INDEX_ETHEREUM } from '../../../plugins/Wallet/constants'
 import { useERC721TokenDetailed } from '../../../web3/hooks/useERC721TokenDetailed'
-import { useTokenAssetDetailed } from '../../../web3/hooks/useTokenAssetDetailed'
 import { useERC721TokenAssetDetailed } from '../../../web3/hooks/useERC721TokenAssetDetailed'
+import { CollectibleContext } from '../DashboardComponents/CollectibleList'
 
 //#region predefined token selector
 const useERC20PredefinedTokenSelectorStyles = makeStyles((theme) =>
@@ -955,7 +954,7 @@ function TransferTab(props: TransferTabProps) {
 
     const onTransfer = useCallback(async () => {
         await transferCallback()
-    }, [onClose, transferCallback])
+    }, [transferCallback])
     //#endregion
 
     //#region remote controlled transaction dialog
@@ -965,11 +964,11 @@ function TransferTab(props: TransferTabProps) {
             (ev) => {
                 if (ev.open) return
                 resetTransferCallback()
-                if (transferState.type !== TransactionStateType.CONFIRMED) return
+                if (transferState.type !== TransactionStateType.HASH) return
                 onClose()
                 tokenBalanceRetry()
             },
-            [transferState.type],
+            [transferState.type, tokenBalanceRetry],
         ),
     )
 
@@ -1167,6 +1166,7 @@ export function DashboardWalletTransferDialogNFT(
     props: WrappedDialogProps<WalletProps & { token: ERC721TokenAssetDetailed | ERC1155TokenAssetDetailed }>,
 ) {
     const { wallet, token } = props.ComponentProps!
+    const { onClose } = props
 
     const { t } = useI18N()
     const classes = useTransferDialogStylesNFT()
@@ -1194,11 +1194,11 @@ export function DashboardWalletTransferDialogNFT(
             (ev) => {
                 if (ev.open) return
                 resetTransferCallback()
-                if (transferState.type !== TransactionStateType.CONFIRMED) return
-                props.onClose()
+                if (transferState.type !== TransactionStateType.HASH) return
+                onClose()
                 collectiblesRetry()
             },
-            [transferState.type],
+            [transferState.type, collectiblesRetry],
         ),
     )
 
@@ -1252,7 +1252,9 @@ export function DashboardWalletTransferDialogNFT(
                             className={classes.button}
                             variant="contained"
                             color="primary"
-                            disabled={!address || !!validationMessage}
+                            disabled={
+                                !!validationMessage || transferState.type === TransactionStateType.WAIT_FOR_CONFIRMING
+                            }
                             onClick={onTransfer}>
                             {validationMessage || t('wallet_transfer_send')}
                         </Button>
