@@ -404,7 +404,7 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                             _private_key_: privateKey,
                         })
                     } catch (error) {
-                        throw new Error(error)
+                        throw error
                     }
 
                     break
