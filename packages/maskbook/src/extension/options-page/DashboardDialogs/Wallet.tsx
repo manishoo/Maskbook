@@ -446,7 +446,7 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
         props.onClose()
         onCreate(name)
     }, [state[0], name, hdWallet?.address, onCreate, onDeriveOrImport])
-    // zhuwp
+
     return (
         <DashboardDialogCore {...props}>
             <DashboardDialogWrapper
