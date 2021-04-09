@@ -73,6 +73,7 @@ import { HD_PATH_WITHOUT_INDEX_ETHEREUM } from '../../../plugins/Wallet/constant
 import { useERC721TokenDetailed } from '../../../web3/hooks/useERC721TokenDetailed'
 import { useERC721TokenAssetDetailed } from '../../../web3/hooks/useERC721TokenAssetDetailed'
 import { CollectibleContext } from '../DashboardComponents/CollectibleList'
+import { exportFromV3Keystore } from './keystore'
 
 //#region predefined token selector
 const useERC20PredefinedTokenSelectorStyles = makeStyles((theme) =>
@@ -183,6 +184,10 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
     const [confirmed, setConfirmed] = useState(false)
     const [showNotification, setShowNotification] = useState(false)
 
+    const [keyStore, setKeystore] = useState('')
+    const [keyStoreConfirmed, setKeystoreConfirmed] = useState(false)
+    const [keyStorePwd, setKeystorePwd] = useState('')
+
     const tabProps: AbstractTabProps = {
         tabs: [
             {
@@ -246,6 +251,60 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                             <Typography className={classes.notification}>{t('wallet_notification')}</Typography>
                         ) : null}
                     </>
+                ),
+            },
+            {
+                label: t('wallet_import_json'),
+                children: (
+                    <div>
+                        <TextField
+                            required
+                            autoFocus
+                            value={keyStore}
+                            onChange={(e) => setKeystore(e.target.value)}
+                            multiline={true}
+                            rows={6}
+                            variant="outlined"
+                            label={t('wallet_import_json_keystore')}
+                            placeholder={t('wallet_import_json_keystore_content')}
+                        />
+                        <TextField
+                            required
+                            variant="outlined"
+                            value={keyStorePwd}
+                            onChange={(e) => setKeystorePwd(e.target.value)}
+                            label={t('wallet_import_json_keystore_password')}
+                            placeholder={t('wallet_import_json_keystore_password_helper')}
+                        />
+
+                        <TextField
+                            required
+                            variant="outlined"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            label={t('wallet_import_json_wallet_name')}
+                            placeholder={t('wallet_import_json_wallet_name_helper')}
+                        />
+
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={keyStoreConfirmed}
+                                    onChange={() => setKeystoreConfirmed((keyStoreConfirmed) => !keyStoreConfirmed)}
+                                />
+                            }
+                            label={
+                                <Box
+                                    sx={{
+                                        display: 'inline-flex',
+                                    }}>
+                                    <Typography className={classes.confirmation} variant="body2">
+                                        {t('wlalet_import_json_confirmation_hint')}
+                                    </Typography>
+                                </Box>
+                            }
+                        />
+                    </div>
                 ),
             },
             {
@@ -336,6 +395,20 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                     await WalletRPC.deriveWalletFromPhrase(name, hdWallet.mnemonic, hdWallet.passphrase)
                     break
                 case 1:
+                    try {
+                        const [addr, privateKey] = exportFromV3Keystore(keyStore, keyStorePwd)
+
+                        await WalletRPC.importNewWallet({
+                            name,
+                            address: addr,
+                            _private_key_: privateKey,
+                        })
+                    } catch (error) {
+                        throw new Error(error)
+                    }
+
+                    break
+                case 2:
                     const words = mnemonic.split(' ')
                     await WalletRPC.importNewWallet({
                         name,
@@ -349,7 +422,7 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                         passphrase: '',
                     })
                     break
-                case 2:
+                case 3:
                     const { address, privateKeyValid } = await WalletRPC.recoverWalletFromPrivateKey(privKey)
                     if (!privateKeyValid) throw new Error(t('import_failed'))
                     await WalletRPC.importNewWallet({
@@ -373,22 +446,23 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
         props.onClose()
         onCreate(name)
     }, [state[0], name, hdWallet?.address, onCreate, onDeriveOrImport])
-
+    // zhuwp
     return (
         <DashboardDialogCore {...props}>
             <DashboardDialogWrapper
                 icon={<CreditCardIcon />}
                 iconColor="#4EE0BC"
                 primary={t(state[0] === 0 ? 'plugin_wallet_on_create' : 'import_wallet')}
-                content={<AbstractTab {...tabProps}></AbstractTab>}
+                content={<AbstractTab {...tabProps} height={350}></AbstractTab>}
                 footer={
                     <DebounceButton
                         variant="contained"
                         onClick={onSubmit}
                         disabled={
                             (!(state[0] === 0 && name && confirmed) &&
-                                !(state[0] === 1 && name && mnemonic) &&
-                                !(state[0] === 2 && name && privKey)) ||
+                                !(state[0] === 1 && name && keyStore && keyStorePwd && keyStoreConfirmed) &&
+                                !(state[0] === 2 && name && mnemonic) &&
+                                !(state[0] === 3 && name && privKey)) ||
                             checkInputLengthExceed(name)
                         }>
                         {t(state[0] === 0 ? 'create' : 'import')}
