@@ -73,9 +73,7 @@ import { HD_PATH_WITHOUT_INDEX_ETHEREUM } from '../../../plugins/Wallet/constant
 import { useERC721TokenDetailed } from '../../../web3/hooks/useERC721TokenDetailed'
 import { useERC721TokenAssetDetailed } from '../../../web3/hooks/useERC721TokenAssetDetailed'
 import { CollectibleContext } from '../DashboardComponents/CollectibleList'
-import { exportFromV3Keystore } from './keystore'
 
-//#region predefined token selector
 const useERC20PredefinedTokenSelectorStyles = makeStyles((theme) =>
     createStyles({
         list: {
@@ -395,18 +393,12 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                     await WalletRPC.deriveWalletFromPhrase(name, hdWallet.mnemonic, hdWallet.passphrase)
                     break
                 case 1:
-                    try {
-                        const [addr, privateKey] = exportFromV3Keystore(keyStore, keyStorePwd)
-
-                        await WalletRPC.importNewWallet({
-                            name,
-                            address: addr,
-                            _private_key_: privateKey,
-                        })
-                    } catch (error) {
-                        throw error
-                    }
-
+                    const { address: addr, privateKey } = await WalletRPC.exportFromV3Keystore(keyStore, keyStorePwd)
+                    await WalletRPC.importNewWallet({
+                        name,
+                        address: addr,
+                        _private_key_: privateKey,
+                    })
                     break
                 case 2:
                     const words = mnemonic.split(' ')
