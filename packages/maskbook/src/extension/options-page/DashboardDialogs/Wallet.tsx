@@ -149,6 +149,13 @@ const useWalletImportDialogStyle = makeStyles((theme: Theme) =>
                 fontSize: 14,
             },
         },
+        privacyComfirm: {
+            fontSize: 15,
+            lineHeight: 1.75,
+            [theme.breakpoints.down('sm')]: {
+                fontSize: 14,
+            },
+        },
         notification: {
             fontSize: 12,
             fontWeight: 500,
@@ -259,6 +266,15 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                         <TextField
                             required
                             autoFocus
+                            variant="outlined"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            label={t('wallet_import_json_wallet_name')}
+                            placeholder={t('wallet_import_json_wallet_name_helper')}
+                        />
+
+                        <TextField
+                            required
                             value={keyStore}
                             onChange={(e) => setKeystore(e.target.value)}
                             multiline={true}
@@ -269,20 +285,12 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                         />
                         <TextField
                             required
+                            type="password"
                             variant="outlined"
                             value={keyStorePwd}
                             onChange={(e) => setKeystorePwd(e.target.value)}
                             label={t('wallet_import_json_keystore_password')}
                             placeholder={t('wallet_import_json_keystore_password_helper')}
-                        />
-
-                        <TextField
-                            required
-                            variant="outlined"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            label={t('wallet_import_json_wallet_name')}
-                            placeholder={t('wallet_import_json_wallet_name_helper')}
                         />
 
                         <FormControlLabel
@@ -297,7 +305,7 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                                     sx={{
                                         display: 'inline-flex',
                                     }}>
-                                    <Typography className={classes.confirmation} variant="body2">
+                                    <Typography className={classes.privacyComfirm} variant="body2">
                                         {t('wlalet_import_json_confirmation_hint')}
                                     </Typography>
                                 </Box>
@@ -394,7 +402,7 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                     await WalletRPC.deriveWalletFromPhrase(name, hdWallet.mnemonic, hdWallet.passphrase)
                     break
                 case 1:
-                    const { address: addr, privateKey } = await WalletRPC.exportFromV3Keystore(keyStore, keyStorePwd)
+                    const { address: addr, privateKey } = await WalletRPC.fromV3Keystore(keyStore, keyStorePwd)
                     await WalletRPC.importNewWallet({
                         name,
                         address: addr,
@@ -446,7 +454,7 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                 icon={<CreditCardIcon />}
                 iconColor="#4EE0BC"
                 primary={t(state[0] === 0 ? 'plugin_wallet_on_create' : 'import_wallet')}
-                content={<AbstractTab {...tabProps} height={350}></AbstractTab>}
+                content={<AbstractTab {...tabProps} height={350} variant="scrollable"></AbstractTab>}
                 footer={
                     <DebounceButton
                         variant="contained"
