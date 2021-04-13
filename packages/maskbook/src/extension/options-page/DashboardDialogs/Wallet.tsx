@@ -272,7 +272,6 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                             label={t('wallet_import_json_wallet_name')}
                             placeholder={t('wallet_import_json_wallet_name_helper')}
                         />
-
                         <TextField
                             required
                             value={keyStore}
@@ -291,25 +290,6 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                             onChange={(e) => setKeystorePwd(e.target.value)}
                             label={t('wallet_import_json_keystore_password')}
                             placeholder={t('wallet_import_json_keystore_password_helper')}
-                        />
-
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={keyStoreConfirmed}
-                                    onChange={() => setKeystoreConfirmed((keyStoreConfirmed) => !keyStoreConfirmed)}
-                                />
-                            }
-                            label={
-                                <Box
-                                    sx={{
-                                        display: 'inline-flex',
-                                    }}>
-                                    <Typography className={classes.privacyComfirm} variant="body2">
-                                        {t('wlalet_import_json_confirmation_hint')}
-                                    </Typography>
-                                </Box>
-                            }
                         />
                     </div>
                 ),
