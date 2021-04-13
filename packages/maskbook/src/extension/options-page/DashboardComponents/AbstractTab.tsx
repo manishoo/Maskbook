@@ -1,5 +1,5 @@
 import { makeStyles } from '@material-ui/core/styles'
-import { Theme, createStyles, Tabs, Tab, Box, BoxProps, Paper } from '@material-ui/core'
+import { Theme, createStyles, Tabs, Tab, Box, BoxProps, Paper, TabsProps } from '@material-ui/core'
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -22,10 +22,10 @@ export interface AbstractTabProps {
     state: readonly [number, (next: number) => void]
     margin?: true | 'top' | 'bottom'
     height?: number | string
-    variant?: 'fullWidth' | 'standard' | 'scrollable'
+    TabsProps?: Partial<TabsProps>
 }
 
-export default function AbstractTab({ tabs, state, height = 200, variant = 'fullWidth' }: AbstractTabProps) {
+export default function AbstractTab({ tabs, state, height = 200, TabsProps }: AbstractTabProps) {
     const classes = useStyles()
     const [value, setValue] = state
     const tabIndicatorStyle = tabs.length ? { width: 100 / tabs.length + '%' } : undefined
@@ -36,10 +36,11 @@ export default function AbstractTab({ tabs, state, height = 200, variant = 'full
                 <Tabs
                     value={value}
                     TabIndicatorProps={{ style: tabIndicatorStyle }}
-                    variant={variant}
+                    variant="fullWidth"
                     indicatorColor="primary"
                     textColor="primary"
-                    onChange={(_: React.SyntheticEvent, newValue: number) => setValue(newValue)}>
+                    onChange={(_: React.SyntheticEvent, newValue: number) => setValue(newValue)}
+                    {...TabsProps}>
                     {tabs.map((tab) => (
                         <Tab
                             className={classes.tab}

@@ -454,7 +454,7 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                 icon={<CreditCardIcon />}
                 iconColor="#4EE0BC"
                 primary={t(state[0] === 0 ? 'plugin_wallet_on_create' : 'import_wallet')}
-                content={<AbstractTab {...tabProps} height={350} variant="scrollable"></AbstractTab>}
+                content={<AbstractTab {...tabProps} height="auto" TabsProps={{ variant: 'scrollable' }}></AbstractTab>}
                 footer={
                     <DebounceButton
                         variant="contained"
