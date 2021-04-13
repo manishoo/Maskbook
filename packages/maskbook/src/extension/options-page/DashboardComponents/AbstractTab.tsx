@@ -1,5 +1,5 @@
 import { makeStyles } from '@material-ui/core/styles'
-import { Theme, createStyles, Tabs, Tab, Box, BoxProps, Paper, TabsProps } from '@material-ui/core'
+import { Theme, createStyles, Tabs, Tab, Box, BoxProps, Paper, TabProps, TabsProps } from '@material-ui/core'
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -23,9 +23,10 @@ export interface AbstractTabProps {
     margin?: true | 'top' | 'bottom'
     height?: number | string
     TabsProps?: Partial<TabsProps>
+    TabProps?: Partial<TabProps>
 }
 
-export default function AbstractTab({ tabs, state, height = 200, TabsProps }: AbstractTabProps) {
+export default function AbstractTab({ tabs, state, height = 200, TabProps, TabsProps }: AbstractTabProps) {
     const classes = useStyles()
     const [value, setValue] = state
     const tabIndicatorStyle = tabs.length ? { width: 100 / tabs.length + '%' } : undefined
@@ -47,6 +48,7 @@ export default function AbstractTab({ tabs, state, height = 200, TabsProps }: Ab
                             label={tab.label}
                             key={tab.label}
                             data-testid={`${tab.id?.toLowerCase()}_tab`}
+                            {...TabProps}
                         />
                     ))}
                 </Tabs>
