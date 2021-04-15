@@ -12,7 +12,7 @@ export function injectToolboxHintAtTwitter(signal: AbortSignal) {
 }
 
 const useStyles = makeStyles((theme) =>
-    createStyles({
+    createStyles<string, { color?: string }>({
         wrapper: {
             paddingTop: 4,
             paddingBottom: 4,
@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) =>
             paddingBottom: theme.spacing(2),
         },
         title: {
-            color: theme.palette.mode === 'dark' ? 'rgb(216, 216, 216)' : 'rgb(15, 20, 25)',
+            color: (props) => (props.color ? props.color : 'rgb(217, 217, 217)'),
         },
         text: {
             marginLeft: 12,
@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) =>
             paddingRight: theme.spacing(2),
         },
         icon: {
-            color: theme.palette.mode === 'dark' ? 'rgb(216, 216, 216)' : 'rgb(15, 20, 25)',
+            color: (props) => (props.color ? props.color : 'rgb(217, 217, 217)'),
         },
         button: {
             '&:hover': {
@@ -48,8 +48,20 @@ const useStyles = makeStyles((theme) =>
     }),
 )
 
+function GetColor() {
+    const ele = document
+        .getElementsByTagName('header')[0]
+        .getElementsByTagName('nav')[0]
+        .getElementsByTagName('a')[1]
+        .getElementsByTagName('div')[0]
+        .getElementsByTagName('div')[1]
+    const style = window.getComputedStyle(ele, null)
+    return style.color
+}
 function ToolboxHintAtTwitter() {
-    const classes = useStyles()
+    const color = GetColor()
+    const classes = useStyles({ color })
+
     // Todo: add click handler
     return (
         <ToolboxHint
