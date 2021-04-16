@@ -33,9 +33,9 @@ const HOVERCOLOR = {
 const ACTIVECOLOR = {
     '21,32,43': 'rgb(25, 59, 82)',
     '0,0,0': 'rgb(13, 29, 48)',
-    '255,255,255': 'rgb(212,237,252)',
+    '255,255,255': 'rgb(212, 237, 252)',
     dark: 'rgb(13, 29, 48)',
-    light: 'rgb(212,237,252)',
+    light: 'rgb(212, 237, 252)',
 }
 
 function getColor(colorMap: any, backgroundColor: string, theme: Theme): string {
