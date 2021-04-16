@@ -12,59 +12,37 @@ export function injectToolboxHintAtTwitter(signal: AbortSignal) {
     createReactRootShadowed(watcher.firstDOMProxy.afterShadow, { signal }).render(<ToolboxHintAtTwitter />)
 }
 
-function getColor(backgroundColor: string, theme: Theme): string {
-    const color = fromRGB(backgroundColor)
-    if (!color) {
-        return theme.palette.mode === 'dark' ? 'rgb(217, 217, 217' : 'rgb(15, 20, 25)'
-    }
-    if (color?.[0] === 21 && color?.[1] === 32 && color?.[2] === 43) {
-        return 'rgb(255, 255, 255)'
-    }
-    if (color?.[0] === 0 && color?.[1] === 0 && color?.[2] === 0) {
-        return 'rgb(217, 217, 217)'
-    }
+type Key = '21,32,43' | '0,0,0' | '255,255,255' | 'dark' | 'light' | undefined
 
-    if (color?.[0] === 255 && color?.[1] === 255 && color?.[2] === 255) {
-        return 'rgb(15, 20, 25)'
-    }
-
-    return theme.palette.mode === 'dark' ? 'rgb(217, 217, 217' : 'rgb(15, 20, 25)'
+//color
+const COLOR = {
+    '21,32,43': 'rgb(255,255,255)',
+    '0,0,0': 'rgb(217,217,217)',
+    '255,255,255': 'rgb(15,20,25)',
+    light: 'rgb(15, 20, 25)',
+    dark: 'rgb(217, 217, 217)',
+}
+const HOVERCOLOR = {
+    '21,32,43': 'rgb(23, 46, 63)',
+    '0,0,0': 'rgb(7, 15, 25)',
+    '255,255,255': 'rgb(233, 246, 253)',
+    dark: 'rgb(7, 15, 25)',
+    light: 'rgb(233, 246, 253)',
 }
 
-function getActiveColor(backgroundColor: string, theme: Theme): string {
-    const color = fromRGB(backgroundColor)
-    if (!color) {
-        return theme.palette.mode === 'dark' ? 'rgb(13, 29, 48)' : 'rgb(212,237,252)'
-    }
-    if (color?.[0] === 21 && color?.[1] === 32 && color?.[2] === 43) {
-        return 'rgb(23, 46, 63)'
-    }
-    if (color?.[0] === 0 && color?.[1] === 0 && color?.[2] === 0) {
-        return 'rgb(13, 29, 48)'
-    }
-
-    if (color?.[0] === 255 && color?.[1] === 255 && color?.[2] === 255) {
-        return 'rgb(212,237,252)'
-    }
-
-    return theme.palette.mode === 'dark' ? 'rgb(13, 29, 48)' : 'rgb(212,237,252)'
+const ACTIVECOLOR = {
+    '21,32,43': 'rgb(25, 59, 82)',
+    '0,0,0': 'rgb(13, 29, 48)',
+    '255,255,255': 'rgb(212,237,252)',
+    dark: 'rgb(13, 29, 48)',
+    light: 'rgb(212,237,252)',
 }
 
-function getHoverColor(backgroundColor: string, theme: Theme): string {
+function getColor(colorMap: any, backgroundColor: string, theme: Theme): string {
     const color = fromRGB(backgroundColor)
-    if (!color) {
-        return theme.palette.mode === 'dark' ? 'rgb(7, 15, 25)' : 'rgb(233, 246, 253)'
-    }
-    if (color?.[0] === 21 && color?.[1] === 32 && color?.[2] === 43) {
-        return 'rgb(23, 46, 63)'
-    }
-    if (color?.[0] === 0 && color?.[1] === 0 && color?.[2] === 0) {
-        return 'rgb(7, 15, 25)'
-    }
-    if (color?.[0] === 255 && color?.[1] === 255 && color?.[2] === 255) {
-        return 'rgb(233, 246, 253)'
-    }
-    return theme.palette.mode === 'dark' ? 'rgb(7, 15, 25)' : 'rgb(233, 246, 253)'
+    if (!color) return colorMap[(theme.palette.mode as Key) ?? 'light']
+    const code = color?.slice(0, 3)?.join(',')
+    return colorMap[(code as Key) ?? (theme.palette.mode as Key) ?? 'light']
 }
 
 const useStyles = makeStyles((theme) =>
@@ -82,7 +60,8 @@ const useStyles = makeStyles((theme) =>
             paddingBottom: theme.spacing(2),
         },
         title: {
-            color: (props) => getColor(props.backgroundColor, theme),
+            color: (props) => getColor(COLOR, props.backgroundColor, theme),
+            fontSize: 18,
         },
         text: {
             marginLeft: 12,
@@ -91,14 +70,14 @@ const useStyles = makeStyles((theme) =>
             paddingRight: theme.spacing(2),
         },
         icon: {
-            color: (props) => getColor(props.backgroundColor, theme),
+            color: (props) => getColor(COLOR, props.backgroundColor, theme),
         },
         button: {
             '&:hover': {
-                backgroundColor: (props) => getHoverColor(props.backgroundColor, theme),
+                backgroundColor: (props) => getColor(HOVERCOLOR, props.backgroundColor, theme),
             },
             '&:active': {
-                backgroundColor: (props) => getActiveColor(props.backgroundColor, theme),
+                backgroundColor: (props) => getColor(ACTIVECOLOR, props.backgroundColor, theme),
             },
         },
     }),
