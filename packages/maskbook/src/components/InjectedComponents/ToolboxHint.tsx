@@ -9,7 +9,7 @@ import { RedPacketCompositionEntry } from '../../plugins/RedPacket/define'
 import { FileServiceCompositionEntry } from '../../plugins/FileService/UI-define'
 import { ITO_CompositionEntry } from '../../plugins/ITO/define'
 import { useAccount } from '../../web3/hooks/useAccount'
-import { useRemoteControlledDialog, useRemoteControlledDialogEvent } from '../../utils/hooks/useRemoteControlledDialog'
+import { useRemoteControlledDialog } from '../../utils/hooks/useRemoteControlledDialog'
 import { PluginTransakMessages } from '../../plugins/Transak/messages'
 import { PluginTraderMessages } from '../../plugins/Trader/messages'
 import { Flags } from '../../utils/flags'
@@ -122,18 +122,18 @@ export function ToolboxHint(props: ToolboxHintProps) {
     //#endregion
 
     //#region Wallet
-    const { onOpen: onSelectWalletDialogOpen } = useRemoteControlledDialogEvent(
+    const { openDialog: openSelectWalletDialog } = useRemoteControlledDialog(
         WalletMessages.events.walletStatusDialogUpdated,
     )
 
-    const { onOpen: onSelectProviderDialogOpen } = useRemoteControlledDialogEvent(
+    const { openDialog: openSelectProviderDialog } = useRemoteControlledDialog(
         WalletMessages.events.selectProviderDialogUpdated,
     )
     const openWallet = useCallback(() => {
         if (selectedWallet) {
-            onSelectWalletDialogOpen()
+            openSelectWalletDialog()
         } else {
-            onSelectProviderDialogOpen()
+            openSelectProviderDialog()
         }
     }, [])
     //#endregion
@@ -166,9 +166,9 @@ export function ToolboxHint(props: ToolboxHintProps) {
     //#endregion
 
     //#region Buy currency
-    const [, setBuyDialogOpen] = useRemoteControlledDialog(PluginTransakMessages.events.buyTokenDialogUpdated)
+    const { setDialog: setBuyDialog } = useRemoteControlledDialog(PluginTransakMessages.events.buyTokenDialogUpdated)
     const openBuyCurrency = useCallback(() => {
-        setBuyDialogOpen({
+        setBuyDialog({
             open: true,
             address: account,
         })
