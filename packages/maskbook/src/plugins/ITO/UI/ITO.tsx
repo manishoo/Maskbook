@@ -312,7 +312,7 @@ export function ITO(props: ITO_Props) {
         claimCallback()
     }, [claimCallback])
 
-    const [_open, setClaimTransactionDialogOpen] = useRemoteControlledDialog(
+    const { setDialog: setClaimTransactionDialog } = useRemoteControlledDialog(
         EthereumMessages.events.transactionDialogUpdated,
         (ev) => {
             if (ev.open) return
@@ -324,7 +324,7 @@ export function ITO(props: ITO_Props) {
 
     useEffect(() => {
         if (claimState.type === TransactionStateType.UNKNOWN) return
-        setClaimTransactionDialogOpen({
+        setClaimTransactionDialog({
             open: true,
             state: claimState,
             summary: `Claiming ${formatBalance(new BigNumber(availability?.swapped ?? 0), token.decimals)} ${
