@@ -171,15 +171,15 @@ async function updateCache(dataProvider: DataProvider, keyword?: string) {
 }
 
 function isCacheExipred(dataProvider: DataProvider) {
-    return (
-        coinNamespace.has(dataProvider) &&
-        Date.now() - (coinNamespace.get(dataProvider)?.lastUpdated.getTime() ?? 0) > CRYPTOCURRENCY_MAP_EXPIRES_AT
-    )
+    const lastUpdated = coinNamespace.get(dataProvider)?.lastUpdated.getTime() ?? 0
+    return Date.now() - lastUpdated > CRYPTOCURRENCY_MAP_EXPIRES_AT
 }
 
 function isBlockedKeyword(type: TagType, keyword: string) {
-    if (type === TagType.HASH) return [...STOCKS_KEYWORDS, ...HASHTAG_KEYWORDS].includes(keyword.toUpperCase())
-    else if (type === TagType.CASH) return [...STOCKS_KEYWORDS, ...CASHTAG_KEYWORDS].includes(keyword.toUpperCase())
+    keyword = keyword.toUpperCase()
+    if (STOCKS_KEYWORDS.includes(keyword)) return true
+    else if (type === TagType.HASH) return HASHTAG_KEYWORDS.includes(keyword)
+    else if (type === TagType.CASH) return CASHTAG_KEYWORDS.includes(keyword)
     return true
 }
 
@@ -195,10 +195,8 @@ export async function checkAvailabilityOnDataProvider(keyword: string, type: Tag
     else if (!coinNamespace.has(dataProvider)) await updateCache(dataProvider)
     // data fetched before update in nonblocking way
     else if (isCacheExipred(dataProvider)) updateCache(dataProvider)
-    return (
-        coinNamespace.get(dataProvider)?.supportedSymbolsSet.has(resolveAlias(keyword, dataProvider).toLowerCase()) ??
-        false
-    )
+    const symbols = coinNamespace.get(dataProvider)?.supportedSymbolsSet
+    return symbols?.has(resolveAlias(keyword, dataProvider).toLowerCase()) ?? false
 }
 
 export async function getAvailableDataProviders(type: TagType, keyword: string) {
@@ -216,10 +214,8 @@ export async function getAvailableDataProviders(type: TagType, keyword: string) 
 
 export async function getAvailableCoins(keyword: string, type: TagType, dataProvider: DataProvider) {
     if (!(await checkAvailabilityOnDataProvider(keyword, type, dataProvider))) return []
-    return (
-        coinNamespace.get(dataProvider)?.supportedSymbolIdsMap.get(resolveAlias(keyword, dataProvider).toLowerCase()) ??
-        []
-    )
+    const ids = coinNamespace.get(dataProvider)?.supportedSymbolIdsMap
+    return ids?.get(resolveAlias(keyword, dataProvider).toLowerCase()) ?? []
 }
 //#endregion
 
