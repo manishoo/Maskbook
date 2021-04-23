@@ -191,7 +191,6 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
     const [showNotification, setShowNotification] = useState(false)
 
     const [keyStore, setKeystore] = useState('')
-    const [keyStoreConfirmed, setKeystoreConfirmed] = useState(false)
     const [keyStorePwd, setKeystorePwd] = useState('')
 
     const tabProps: AbstractTabProps = {
@@ -447,7 +446,7 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                         onClick={onSubmit}
                         disabled={
                             (!(state[0] === 0 && name && confirmed) &&
-                                !(state[0] === 1 && name && keyStore && keyStorePwd && keyStoreConfirmed) &&
+                                !(state[0] === 1 && name && keyStore && keyStorePwd) &&
                                 !(state[0] === 2 && name && mnemonic) &&
                                 !(state[0] === 3 && name && privKey)) ||
                             checkInputLengthExceed(name)
